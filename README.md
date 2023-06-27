@@ -6,12 +6,14 @@ The program provides simultaneous microphone audio recording and video recording
 * Set the duration of the acquisition using the node “TimeSpan” (in the format hh:mm:ss).
 * Run the program by clicking on Start.
 * Stop and restart to initiate a new recording.
+* Avoid interrupting the Bonsai program before the end of the trial (ee N.B. below).
 
 <img width="753" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/05a3eb52-c7f8-47bb-908f-fa3228006669">
 
 &nbsp;
 
-While running, you will see this window. The blue line is the audio signal from the microphone, the orange line is the frames' TTL.
+While running, you will see this window updating every 0.1 seconds. The blue line is the audio signal from the microphone, the orange line is the frames' TTL.
+When the trial is over, this trace will not update.
 
 <img width="301" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/29b7bce3-30ad-4d2c-a2dc-3ce04e6c0f6d">
 
@@ -28,6 +30,10 @@ The saved data consist of 4 files, with all filenames starting with the same dat
   1. camera timestamps (in Bonsai clock) of every time Bonsai received a frame from the camera;
   2. camera timestamps of each frame according to the FLIR camera internal clock;
   3. frame IDs as given by the FLIR camera processor (this might be useful to identify dropped frames).
+
+**N.B.** Avoid interrupting the Bonsai program before the end of the trial (trial duration set using the node "TimeSpan"). If you interrupt the trial, the audio file will be slighlty cut at the end with respect to the video file. This is because the last unsaved audio buffer (<0.1 seconds) will be lost.
+
+the number of TTL timestamps will be very likely lower than the number of video frames in the video file, because the audio file will be slighlty cut at the end (the last unsaved audio buffer will be lost).
  
 ## Camera settings
 To change frame rate, exposure time, gain, resolution, etc. use the camera's own software SpinView (see screenshot below). Close this software before running the Bonsai program, otherwise you will get an error.
@@ -59,6 +65,8 @@ This script will automatically give you the timestamps of the TTL onsets (in mic
 
 Make sure that the number of video frames (from the video file) are the same than the number of TTL timestamps. 
 The same script has a section to verify this.
+
+**N.B.** If the Bonsai program is interrupted before the end of the trial as set using the node "TimeSpan", the number of TTL timestamps will be very likely lower than the number of video frames in the video file, because the audio file will be slighlty cut at the end (the last unsaved audio buffer will be lost, corresponding to <0.1 seconds).
 
 Note that the algorithm for extraction TTLs might need to be adapted if you use a camera acquisition rate different from 50 fps (especially >50, it should still work if <50).
 
