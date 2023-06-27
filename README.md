@@ -50,3 +50,18 @@ Within the node “Some params”, you can change:
 * Filenames of each file
 
 <img width="134" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/6eb0f37a-60e6-4578-9a65-55426c3cb344">
+
+## Extracting frame timestamps from the TTLs in the audio signal
+
+Use the Matlab script `get_frame_timestamps_from_microphone_ttl__script.m`.
+
+This script will automatically give you the timestamps of the TTL onsets (in microphone samples) in the variable `locs`.
+
+Make sure that the number of video frames (from the video file) are the same than the number of TTL timestamps. 
+The same script has a section to verify this.
+
+Note that the algorithm for extraction TTLs might need to be adapted if you use a camera acquisition rate different from 50 fps (especially >50, it should still work if <50).
+
+There is also code to load the .csv camera file.
+
+![image](https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/ad7576bc-e3d8-4bb4-a6a6-90c7f0797b3b)
