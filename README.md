@@ -10,7 +10,13 @@ The program provides simultaneous microphone audio recording and video recording
 <img width="753" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/05a3eb52-c7f8-47bb-908f-fa3228006669">
 
 &nbsp;
- 
+
+While running, you will see this window. The blue line is the audio signal from the microphone, the orange line is the frames' TTL.
+
+<img width="301" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/29b7bce3-30ad-4d2c-a2dc-3ce04e6c0f6d">
+
+&nbsp;
+
 The data will be saved in the same path of the Bonsai program, subfolder \data:
 ```C:\Users\dailyuser\Documents\Bonsai\record_cameraFLIR_viaArduino+AudioCapture\data\```
 
