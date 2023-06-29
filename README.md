@@ -57,6 +57,10 @@ Within the node “Some params”, you can change:
 
 <img width="134" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/6eb0f37a-60e6-4578-9a65-55426c3cb344">
 
+### Camera trigger via Arduino
+
+The Bonsai program uses an Arduino board (serially connected via USB) to trigger the acquisition of frames. Arduino runs the script `TTL_controlled_via_timer_serial.ino`. There is an led wired to the Arduino: light on indicates camera trigger on.
+
 ## Extracting frame timestamps from the TTLs in the audio signal
 
 Use the Matlab script `get_frame_timestamps_from_microphone_ttl__script.m`.
@@ -73,3 +77,5 @@ Note that the algorithm for extraction TTLs might need to be adapted if you use 
 There is also code to load the .csv camera file.
 
 ![image](https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/ad7576bc-e3d8-4bb4-a6a6-90c7f0797b3b)
+
+## Arduino
