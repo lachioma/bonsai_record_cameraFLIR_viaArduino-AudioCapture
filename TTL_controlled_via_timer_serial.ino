@@ -1,3 +1,8 @@
+// As long as Arduino receives char '1' via serial communication, 
+// keep the digital pins on HIGH.
+// Switch pins to LOW if no char '1' is received within 'durRecvChar' milliseconds
+// or if any char other than '1' is received.
+
 const int pinOut1 = 13;
 const int pinOut2 = 52;
 const int pinOut3 = 53;
@@ -13,7 +18,7 @@ void setup() {
   digitalWrite(pinOut1, LOW);
   pinMode(pinOut2, OUTPUT);
   digitalWrite(pinOut2, LOW);
-    pinMode(pinOut3, OUTPUT);
+  pinMode(pinOut3, OUTPUT);
   digitalWrite(pinOut3, LOW);
   // Open serial communications and wait for port to open:
   // This requires RX and TX channels (pins 0 and 1)
