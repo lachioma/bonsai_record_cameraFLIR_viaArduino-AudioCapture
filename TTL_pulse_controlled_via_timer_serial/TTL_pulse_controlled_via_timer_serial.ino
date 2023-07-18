@@ -57,7 +57,7 @@ void loop() {
 
   if (TTLisON == true) {
     
-    while ((millis()-t_low) < ttl_durLow)) {
+    while ((millis()-t_low) < ttl_durLow) {
       ; // do nothing, just wait
     }
     digitalWrite(pinOut1, HIGH);
@@ -86,6 +86,6 @@ void recvOneChar() {
     if (Serial.available() > 0) {
         receivedChar = Serial.read();
         newData = true;
-        t0 = millis();
+        t_serial = millis();
     }
 }
