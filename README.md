@@ -114,7 +114,7 @@ There is also code to load the .csv camera file.
 
 &nbsp;
 
-Just a screenshot of the various Bonsai windows when the program is running and acquiring data.
+Just another screenshot of the Bonsai program.
 
 <img width="956" alt="Screenshot 2023-07-18 182406" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/a92b11d4-cd17-46c2-b22d-8488d80d71e9">
 
