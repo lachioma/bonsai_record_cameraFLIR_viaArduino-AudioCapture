@@ -1,13 +1,14 @@
 // As long as Arduino receives char '1' via serial communication, 
 // keep on emitting a TTL pulse at frequency 'ttl_freq', 
-// with HIGH state lasting 'ttl_durHigh' milliseconds.
+// with HIGH state lasting 'ttl_durHigh' microseconds.
 // Switch pins to LOW if no char '1' is received within 'durRecvChar' milliseconds
 // or if any char other than '1' is received.
 
-const unsigned long ttl_freq    = 50; // Hz, TTL pulse frequency
+const double ttl_freq    = 50; // Hz, TTL pulse frequency
 
-const int           ttl_durHigh =  2; // ms, TTL pulse HIGH state duration
-const unsigned long ttl_durLow  = 1000/ttl_freq - ttl_durHigh;
+const double ttl_durCycle = 1000000/ttl_freq; // us, TTL cycle duration
+const double ttl_durHigh  = 2000; // us, TTL pulse HIGH state duration
+const double ttl_durLow   = ttl_durCycle - ttl_durHigh; // us, TTL pulse LOW state duration
 
 const int pinOut1 = 13;
 const int pinOut2 = 52;
@@ -17,7 +18,7 @@ const int durRecvChar = 500; // how many msec to wait without serial communicati
 boolean TTLisON = false; // when TTLisON true, the TTL will cycle through its high and low states; when false TTL will stay Low.
 char receivedChar;
 boolean newData = false;
-unsigned long t_low    = millis(); // will store onset time Low state (==offset High state)
+unsigned long t_cycle  = micros(); // will store start of each cycle
 unsigned long t_serial = millis(); // will store time char is received
 
 
@@ -31,7 +32,7 @@ void setup() {
   // Open serial communications and wait for port to open:
   // This requires RX and TX channels (pins 0 and 1)
   // wait for serial port to connect. Needed for native USB port only
-  Serial.begin(14400); //115200
+  Serial.begin(115200); //115200
   while (!Serial) {
     ;
   }
@@ -57,19 +58,18 @@ void loop() {
 
   if (TTLisON == true) {
     
-    while ((millis()-t_low) < ttl_durLow) {
+    while ((micros()-t_cycle) < ttl_durCycle) {
       ; // do nothing, just wait
     }
+    t_cycle = micros();
     digitalWrite(pinOut1, HIGH);
     digitalWrite(pinOut2, HIGH);
     digitalWrite(pinOut3, HIGH);
     //Serial.println("LED turned on");
-    delay(ttl_durHigh);
+    delayMicroseconds(ttl_durHigh);
     digitalWrite(pinOut1, LOW);
     digitalWrite(pinOut2, LOW);
     digitalWrite(pinOut3, LOW);
-    // delay(ttl_durLow);
-    t_low = millis();
 
   }
   else { // if (TTLisON == false)

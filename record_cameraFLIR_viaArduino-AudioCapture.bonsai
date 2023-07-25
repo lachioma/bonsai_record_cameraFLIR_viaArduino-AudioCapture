@@ -16,7 +16,7 @@
         <Combinator xsi:type="io:CreateSerialPort">
           <io:Name>ArduinoSerialPort</io:Name>
           <io:PortName>COM4</io:PortName>
-          <io:BaudRate>14400</io:BaudRate>
+          <io:BaudRate>115200</io:BaudRate>
           <io:Parity>None</io:Parity>
           <io:ParityReplace>63</io:ParityReplace>
           <io:DataBits>8</io:DataBits>
@@ -32,7 +32,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="TimeSpanProperty">
-          <Value>PT1M10S</Value>
+          <Value>PT1M</Value>
         </Combinator>
       </Expression>
       <Expression xsi:type="Add">
@@ -268,7 +268,7 @@
         </PropertyMappings>
       </Expression>
       <Expression xsi:type="io:CsvWriter">
-        <io:FileName>data\20230718_182654_mic.csv</io:FileName>
+        <io:FileName>data\20230718_182731_mic.csv</io:FileName>
         <io:Append>false</io:Append>
         <io:Overwrite>false</io:Overwrite>
         <io:Suffix>None</io:Suffix>
@@ -299,7 +299,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="al:AudioWriter">
-          <al:FileName>data\20230718_182654_mic.wav</al:FileName>
+          <al:FileName>data\20230718_182731_mic.wav</al:FileName>
           <al:Suffix>None</al:Suffix>
           <al:Buffered>true</al:Buffered>
           <al:Overwrite>false</al:Overwrite>
@@ -436,17 +436,13 @@
           <Property Name="Text" />
         </PropertyMappings>
       </Expression>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="SubscribeSubject">
-          <Name>CameraImageSize</Name>
-        </Builder>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>CameraImageSize</Name>
       </Expression>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="PropertyMapping">
-          <PropertyMappings>
-            <Property Name="Size" />
-          </PropertyMappings>
-        </Builder>
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="Size" />
+        </PropertyMappings>
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="drw:CreateCanvas">
@@ -482,7 +478,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="drw:AddText">
-          <drw:Text>237</drw:Text>
+          <drw:Text>122</drw:Text>
           <drw:Alignment>Near</drw:Alignment>
           <drw:LineAlignment>Near</drw:LineAlignment>
           <drw:TextRenderingHint>AntiAliasGridFit</drw:TextRenderingHint>
@@ -504,7 +500,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="cv:VideoWriter">
-          <cv:FileName>data\20230718_182654_cam1.avi</cv:FileName>
+          <cv:FileName>data\20230718_182731_cam1.avi</cv:FileName>
           <cv:Suffix>None</cv:Suffix>
           <cv:Buffered>true</cv:Buffered>
           <cv:Overwrite>false</cv:Overwrite>
@@ -555,7 +551,7 @@
         <scr:Expression>new(Item2 as Timestamp_camera_clock_us, Item1 as Timestamp_bonsai_clock_s, Item3 as FrameID)</scr:Expression>
       </Expression>
       <Expression xsi:type="io:CsvWriter">
-        <io:FileName>data\20230718_182654_cam1.csv</io:FileName>
+        <io:FileName>data\20230718_182731_cam1.csv</io:FileName>
         <io:Append>false</io:Append>
         <io:Overwrite>false</io:Overwrite>
         <io:Suffix>None</io:Suffix>
