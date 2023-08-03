@@ -7,7 +7,7 @@ The program provides simultaneous microphone audio recording and video recording
 * Set the duration of the acquisition (i.e. trial) using the node “TimeSpan” (in the format hh:mm:ss).
 * Run the program by clicking on Start.
 * Stop and restart to initiate a new recording.
-* Avoid interrupting the Bonsai program before the end of the trial (more details in the note "N.B.", section Saved data).
+* Press F8 to interrupt the Bonsai program before the end of the trial (see note ["N.B."](#nb) below).
 
 <img width="753" alt="image" src="https://github.com/lachioma/bonsai_record_cameraFLIR_viaArduino-AudioCapture/assets/29898879/05a3eb52-c7f8-47bb-908f-fa3228006669">
 
@@ -51,7 +51,8 @@ The saved data consist of 4 files, with all filenames starting with the same dat
 
 &nbsp;
 
-**N.B.** If you interrupt the Bonsai program before the end of the trial (trial duration set using the node "TimeSpan"), a few video frames at the end of the video file will not have the corresponding frame TTLs in the audio file. This happens because when you interrupt the trial, the audio file will be slighlty cut at the end with respect to the video file (because the last unsaved audio buffer (<0.1 seconds) will be lost).
+#### N.B.
+If you interrupt the Bonsai program *before* the end of the trial (trial duration set using the node "TimeSpan") by just clicking on "Stop" and not by pressing F8, a few video frames at the end of the video file will not have the corresponding frame TTLs in the audio file. This happens because when you interrupt the trial, the audio file will be slighlty cut at the end with respect to the video file (because the last unsaved audio buffer (<0.1 seconds) will be lost).
 
  
 ## Camera settings
