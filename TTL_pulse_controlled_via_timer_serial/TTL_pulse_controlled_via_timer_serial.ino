@@ -4,7 +4,7 @@
 // Switch pins to LOW if no char '1' is received within 'durRecvChar' milliseconds
 // or if any char other than '1' is received.
 
-const double ttl_freq    = 50; // Hz, TTL pulse frequency
+const double ttl_freq    = 30; // Hz, TTL pulse frequency
 
 const double ttl_durCycle = 1000000/ttl_freq; // us, TTL cycle duration
 const double ttl_durHigh  = 2000; // us, TTL pulse HIGH state duration
@@ -17,6 +17,7 @@ const int durRecvChar = 500; // how many msec to wait without serial communicati
 
 boolean TTLisON = false; // when TTLisON true, the TTL will cycle through its high and low states; when false TTL will stay Low.
 char receivedChar;
+char lastReceivedChar;
 boolean newData = false;
 unsigned long t_cycle  = micros(); // will store start of each cycle
 unsigned long t_serial = millis(); // will store time char is received
@@ -42,14 +43,21 @@ void setup() {
 
 void loop() {
   newData = false;
-  recvOneChar();
+  recvOneChar(); 
 
-  if (newData == true && receivedChar == '1') {
-    // Start or reset timer for char received:
-    t_serial = millis();
+  if (newData == true) {
+    lastReceivedChar = receivedChar;
     newData = false;
-  }
-  if (((millis()-t_serial) < durRecvChar)) {
+    if (lastReceivedChar == '1') {
+      // Start or reset timer for char received:
+      t_serial = millis();
+    }
+    else if (lastReceivedChar != '1'){
+      TTLisON = false;  
+    }
+  } 
+
+  if (lastReceivedChar == '1' && ((millis()-t_serial) < durRecvChar)) {
     TTLisON = true;
   }
   else {
@@ -86,6 +94,6 @@ void recvOneChar() {
     if (Serial.available() > 0) {
         receivedChar = Serial.read();
         newData = true;
-        t_serial = millis();
+        // t_serial = millis();
     }
 }
