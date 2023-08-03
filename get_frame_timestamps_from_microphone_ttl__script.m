@@ -3,7 +3,7 @@
 
 clear
 
-folder_root = 'C:\Users\dailyuser\Documents\Bonsai\record_cameraFLIR_viaArduino-AudioCapture\data';
+folder_root = 'C:\Users\dailyuser\Documents\Bonsai\bonsai_record_cameraFLIR_viaArduino-AudioCapture\data';
 
 [filename_mic, path_mic] = uigetfile([folder_root filesep '*_mic.wav']);
 filename_datetime_tag = filename_mic(1:end-8);
