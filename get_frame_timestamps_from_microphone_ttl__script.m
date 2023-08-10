@@ -107,6 +107,21 @@ filename_vidcsv = [filename_datetime_tag '_cam1.csv'];
 T = readmatrix(fullfile(path_vidcsv,filename_vidcsv), ...
         'OutputType','double', 'Delimiter',',');
 
+%% Get duration, frame time, and frame rate according to all clocks
+
+
+dur_snd = (locs(end) - locs(1)) / Fs;
+dur_cam = (T(end,1) - T(1,1)) / 1e9;
+dur_bon = (T(end,2) - T(1,2));
+
+frametime_snd = mean(diff(locs)/Fs);
+frametime_cam = mean(diff(T(1:end,1))) / 1e9;
+frametime_bon = mean(diff(T(1:end,2)));
+
+framerate_snd = 1/frametime_snd;
+framerate_cam = 1/frametime_cam;
+framerate_bon = 1/frametime_bon;
+
 %% Check for dropped frames
 
 % nr_dropped_frames_id = (T(end,3)+1) - v.NumFrames;
@@ -139,18 +154,3 @@ nr_dropped_frames_bon = length( find(dt_bon_sec > frametime_bon*1.9) );
 %     fprintf(' Based on inter-frame interval of bonsai timestamps, %d frames were dropped ! \n', nr_dropped_frames_bon);
 %     fprintf(' ! ! ! ! ! \n\n');
 % end
-
-%% Get duration, frame time, and frame rate according to all clocks
-
-
-dur_snd = (locs(end) - locs(1)) / Fs;
-dur_cam = (T(end,1) - T(1,1)) / 1e9;
-dur_bon = (T(end,2) - T(1,2));
-
-frametime_snd = mean(diff(locs)/Fs);
-frametime_cam = mean(diff(T(1:end,1))) / 1e9;
-frametime_bon = mean(diff(T(1:end,2)));
-
-framerate_snd = 1/frametime_snd;
-framerate_cam = 1/frametime_cam;
-framerate_bon = 1/frametime_bon;
