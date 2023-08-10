@@ -3,9 +3,15 @@
 
 clear
 
-folder_root = 'C:\Users\dailyuser\Documents\Bonsai\bonsai_record_cameraFLIR_viaArduino-AudioCapture\data';
+folder_root = 'Y:\Users\pernik\20230807\m1\trial1_rubber';
 
-[filename_mic, path_mic] = uigetfile([folder_root filesep '*_mic.wav']);
+ls_mic = dir([folder_root filesep '*_mic.wav']);
+if length(ls_mic) == 1
+    path_mic = ls_mic(1).folder;
+    filename_mic = ls_mic(1).name;
+else
+    [filename_mic, path_mic] = uigetfile([folder_root filesep '*_mic.wav']);
+end
 filename_datetime_tag = filename_mic(1:end-8);
 
 [y,Fs] = audioread(fullfile(path_mic,filename_mic));
@@ -31,7 +37,8 @@ val_low  = mean(ttl_piece(ttl_piece<0));
 val_high = mean(ttl_piece(ttl_piece>0));
 % val_low  = -0.02;
 % val_high =  0.01;
-dval_min = (val_high - val_low)/3;
+dval_min = (val_high - val_low)/2;
+val_min  = val_high;
 
 
 %%% Extract timestamps of camera TTLs (in microphone samples)
@@ -39,7 +46,9 @@ dval_min = (val_high - val_low)/3;
 min_dist = 200; % Minimum distance of ttl onsets, in Hz (set reasonably > than actual camera frame rate)
 
 [pks,locs] = findpeaks(ttl, "MinPeakDistance",Fs/min_dist,...
-    "MinPeakProminence",dval_min);
+    "MinPeakProminence",dval_min ...
+    , "MinPeakHeight",val_min...
+    );
 
 % locs contains the timestamps of the TTL onsets (in microphone samples)
 
@@ -50,8 +59,8 @@ plot(locs,pks, 'v');
 xlabel('Audio samples')
 
 figure
-histogram(diff(locs))
-xlabel('Frame time (audio samples)')
+histogram(diff(locs)/Fs*1000)
+xlabel('Frame time (ms)')
 
 %% Get number of video frames and check consistency with TTLs
 
@@ -67,14 +76,46 @@ if v.NumFrames ~= length(locs)
     fprintf(' ! ! ! ! ! \n\n');
 end
 
+d_locs_sec = diff(locs)/Fs;
+frametime_snd = mean(d_locs_sec);
+nr_dropped_frames = length( find(d_locs_sec > frametime_snd*1.5) );
+if nr_dropped_frames
+    fprintf('\n ! ! ! ! ! \n');
+    fprintf(' Based on inter-frame interval, %d frames were dropped ! \n', nr_dropped_frames);
+    fprintf(' ! ! ! ! ! \n\n');
+end
+
 %% Load .csv camera timestamps
 
 path_vidcsv     = path_mic;
 filename_vidcsv = [filename_datetime_tag '_cam1.csv'];
 
-% Column 1: camera timestamps (in Bonsai clock) of every time Bonsai received a frame from the camera
-% Column 2: camera timestamps of each frame according to the FLIR camera internal clock
+% Column 1: camera timestamps of each frame according to the FLIR camera internal clock (in nanoseconds)
+% Column 2: camera timestamps (in Bonsai clock) of every time Bonsai received a frame from the camera (in seconds)
 % Column 3: frame IDs as given by the FLIR camera processor (this might be useful to identify dropped frames)
 
 T = readmatrix(fullfile(path_vidcsv,filename_vidcsv), ...
         'OutputType','double', 'Delimiter',',');
+
+df = (T(end,3)+1) - v.NumFrames;
+if df
+    fprintf('\n ! ! ! ! ! \n');
+    fprintf(' Based on the frame IDs, %d frames were dropped ! \n', df);
+    fprintf(' ! ! ! ! ! \n\n');
+end
+
+
+%% Get duration, frame time, and frame rate according to all clocks
+
+
+dur_snd = (locs(end) - locs(1)) / Fs;
+dur_cam = (T(end,1) - T(1,1)) / 1e9;
+dur_bon = (T(end,2) - T(1,2));
+
+frametime_snd = mean(diff(locs)/Fs);
+frametime_cam = mean(diff(T(1:end,1))) / 1e9;
+frametime_bon = mean(diff(T(1:end,2)));
+
+framerate_snd = 1/frametime_snd;
+framerate_cam = 1/frametime_cam;
+framerate_bon = 1/frametime_bon;
