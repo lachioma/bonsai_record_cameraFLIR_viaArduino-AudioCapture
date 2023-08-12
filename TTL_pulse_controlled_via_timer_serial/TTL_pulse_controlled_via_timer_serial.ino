@@ -9,7 +9,6 @@ const double ttl_freq    = 30; // Hz, TTL pulse frequency
 const double ttl_durCycle = 1000000/ttl_freq; // us, TTL cycle duration
 const double ttl_durHigh  = 2000; // us, TTL pulse HIGH state duration
 const double ttl_durLow   = ttl_durCycle - ttl_durHigh; // us, TTL pulse LOW state duration
-const double cycleOffset  = 4; // us. To have a more precise ttl_durCycle, the time micros() takes (~3-4 us) is taken into account and subtracted to ttl_durCycle
 
 const int pinOut1 = 13;
 const int pinOut2 = 52;
@@ -67,7 +66,7 @@ void loop() {
 
   if (TTLisON == true) {
     
-    while ((micros()-t_cycle) < (ttl_durCycle-cycleOffset)) {
+    while ((micros()-t_cycle) < ttl_durCycle) {
       ; // do nothing, just wait
     }
     t_cycle = micros();
