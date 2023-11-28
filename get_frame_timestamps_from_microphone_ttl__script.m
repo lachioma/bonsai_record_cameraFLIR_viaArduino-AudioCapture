@@ -3,7 +3,7 @@
 
 clear
 
-folder_root = 'Y:\Users\pernik\20230807\m1\trial5_rubber';
+folder_root = 'Y:\Users\pernik\20230807M_DIM\m1\trial2_leaves';
 
 ls_mic = dir([folder_root filesep '*_mic.wav']);
 if length(ls_mic) == 1
@@ -78,22 +78,82 @@ v.NumFrames;
 if v.NumFrames ~= length(locs)
     fprintf('\n ! ! ! ! ! \n');
     fprintf(' The number of video frames is different from the number of TTL onsets extracted ! \n');
+    fprintf(' The number of video frames is %d, the number of TTL onsets extracted is %d \n', v.NumFrames, length(locs));
     fprintf(' The TTL onset extraction could have missed some TTLs, or some frames could have been dropped.\n')
     fprintf(' N.B. dropped frames do have a TTL (=camera sensor has been exposed) but they are not saved in the video file.\n')
     fprintf(' ! ! ! ! ! \n\n');
+else
+    fprintf(' Great! The number of video frames matches the number of TTL onsets extracted ! \n');
 end
 
 
-k = 0.05;
+thr_dt = 0.001; % how many sec a frame has to be offset to detect a dropped frame
 d_locs_sec = diff(locs)/Fs;
 frametime_snd = mean(d_locs_sec);
-nr_problematic_ttls = length( find(d_locs_sec > frametime_snd*(1+k) | d_locs_sec < frametime_snd*(1-k)) );
+problematic_ttls =  find(d_locs_sec > (frametime_snd+thr_dt) | d_locs_sec < (frametime_snd-thr_dt)) ;
+nr_problematic_ttls = length( problematic_ttls );
 if nr_problematic_ttls
     fprintf('\n ! ! ! ! ! \n');
     fprintf(' Based on inter-TTL interval, %d TTLs were too close or too far apart compared to expected! \n', nr_problematic_ttls);
     fprintf(' Likely something is wrong with the TTL onset extraction... \n')
     fprintf(' ! ! ! ! ! \n\n');
 end
+
+
+%%
+
+% Time vector of microphone audio data (in sec)
+t_mic = [1 : length(y)]' / Fs;
+
+% Time vector of video frames (in sec, aligned to microphone audio data)
+t_vid = t_mic(locs);
+
+% k = 1:1000000;
+% figure;
+% hold on;
+% plot(t_mic(k), y(k,1))
+% plot(t_vid, zeros(length(t_vid),1), 'v')
+% xlim([0 t_mic(k(end))])
+
+
+%% Save timestamps in .mat file
+
+datamat_fullpath = fullfile(folder_root, filename_datetime_tag);
+save(datamat_fullpath, 't_mic', 't_vid');
+
+%% Sample code to plot Moseq "syllables"
+
+moseq_events_onset_fr = [123 1000 6000 9000];
+moseq_events_offset_fr = [moseq_events_onset_fr(2:end)-1, moseq_events_onset_fr(end)+1000];
+
+
+n_moseq_events = length(moseq_events_onset_fr);
+
+
+t_moseq_events = t_vid(moseq_events_onset_fr);
+
+
+
+TopValue  = 0.2;
+BaseValue = 0;
+Colors = lines(n_moseq_events);
+
+k = 1:100000000;
+figure;
+hold on;
+plot(t_mic(k), y(k,1))
+plot(t_vid, zeros(length(t_vid),1), 'v')
+xlim([0 t_mic(k(end))])
+
+for f = 1 : length(moseq_events_onset_fr)
+    x_area = t_vid([moseq_events_onset_fr(f), moseq_events_offset_fr(f)]);
+    y_area = ones(1,2)*TopValue;
+    h_area = area( x_area , y_area , 'linestyle','none' , 'facecolor',Colors(f,:) ,...
+    'BaseValue', BaseValue, 'ShowBaseline','off' ) ;
+    uistack(h_area,'bottom')  % this is to move area h_area to the bottom of the current stack
+end
+
+
 
 %% Load .csv camera timestamps
 
