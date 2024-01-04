@@ -76,12 +76,12 @@
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
-        <X>4</X>
-        <Y>5</Y>
+        <X>3</X>
+        <Y>3</Y>
       </Location>
       <Size>
-        <Width>450</Width>
-        <Height>930</Height>
+        <Width>954</Width>
+        <Height>751</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1161,6 +1161,42 @@
     </Size>
     <WindowState>Normal</WindowState>
   </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
   <DialogSettings xsi:type="WorkflowEditorSettings">
     <Visible>false</Visible>
     <Location>
@@ -1194,6 +1230,18 @@
     <Size>
       <Width>335</Width>
       <Height>173</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
     </Size>
     <WindowState>Normal</WindowState>
   </DialogSettings>
@@ -1572,12 +1620,12 @@
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
-        <X>4</X>
-        <Y>5</Y>
+        <X>3</X>
+        <Y>3</Y>
       </Location>
       <Size>
-        <Width>450</Width>
-        <Height>930</Height>
+        <Width>954</Width>
+        <Height>751</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1655,12 +1703,12 @@
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
-        <X>4</X>
-        <Y>5</Y>
+        <X>3</X>
+        <Y>3</Y>
       </Location>
       <Size>
-        <Width>450</Width>
-        <Height>930</Height>
+        <Width>954</Width>
+        <Height>751</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
