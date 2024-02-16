@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<WorkflowBuilder Version="2.7.3"
+<WorkflowBuilder Version="2.7.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
@@ -7,11 +7,11 @@
                  xmlns:al="clr-namespace:Bonsai.Audio;assembly=Bonsai.Audio"
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
+                 xmlns:sys="clr-namespace:System;assembly=mscorlib"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:drw="clr-namespace:Bonsai.Vision.Drawing;assembly=Bonsai.Vision"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:p1="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-                 xmlns:sys="clr-namespace:System;assembly=mscorlib"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -178,7 +178,7 @@
             </Expression>
             <Expression xsi:type="Add">
               <Operand xsi:type="TimeSpanProperty">
-                <Value>PT2S</Value>
+                <Value>PT3S</Value>
               </Operand>
             </Expression>
             <Expression xsi:type="rx:ReplaySubject">
@@ -709,35 +709,30 @@
         </Workflow>
       </Expression>
       <Expression xsi:type="Combinator">
-        <Combinator xsi:type="rx:Timer">
-          <rx:DueTime>PT0S</rx:DueTime>
-          <rx:Period>PT0.2S</rx:Period>
+        <Combinator xsi:type="io:CreateSerialPort">
+          <io:Name>ArduinoSerialPort</io:Name>
+          <io:PortName>COM4</io:PortName>
+          <io:BaudRate>115200</io:BaudRate>
+          <io:Parity>None</io:Parity>
+          <io:ParityReplace>63</io:ParityReplace>
+          <io:DataBits>8</io:DataBits>
+          <io:StopBits>One</io:StopBits>
+          <io:Handshake>None</io:Handshake>
+          <io:DiscardNull>false</io:DiscardNull>
+          <io:DtrEnable>false</io:DtrEnable>
+          <io:RtsEnable>false</io:RtsEnable>
+          <io:ReadBufferSize>4096</io:ReadBufferSize>
+          <io:WriteBufferSize>2048</io:WriteBufferSize>
+          <io:ReceivedBytesThreshold>1</io:ReceivedBytesThreshold>
         </Combinator>
       </Expression>
       <Expression xsi:type="Combinator">
-        <Combinator xsi:type="StringProperty">
-          <Value>1</Value>
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT2S</rx:DueTime>
         </Combinator>
       </Expression>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="io:SerialStringWrite">
-          <io:PortName>ArduinoSerialPort</io:PortName>
-          <io:NewLine />
-        </Combinator>
-      </Expression>
-      <Expression xsi:type="rx:TakeWhile">
-        <Description />
-        <Workflow>
-          <Nodes>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>KeyState</Name>
-            </Expression>
-            <Expression xsi:type="WorkflowOutput" />
-          </Nodes>
-          <Edges>
-            <Edge From="0" To="1" Label="Source1" />
-          </Edges>
-        </Workflow>
+      <Expression xsi:type="rx:BehaviorSubject">
+        <Name>ArduinoDelayedTrigger</Name>
       </Expression>
       <Expression xsi:type="Disable">
         <Builder xsi:type="SubscribeSubject">
@@ -761,6 +756,43 @@
       </Expression>
       <Expression xsi:type="SubscribeSubject">
         <Name>TimerCamEnd</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Timer">
+          <rx:DueTime>PT0S</rx:DueTime>
+          <rx:Period>PT0.1S</rx:Period>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>1</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>ArduinoDelayedTrigger</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:SubscribeWhen" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="io:SerialStringWrite">
+          <io:PortName>ArduinoSerialPort</io:PortName>
+          <io:NewLine />
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="rx:TakeWhile">
+        <Description />
+        <Workflow>
+          <Nodes>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>KeyState</Name>
+            </Expression>
+            <Expression xsi:type="WorkflowOutput" />
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+          </Edges>
+        </Workflow>
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="rx:TakeUntil" />
@@ -878,20 +910,24 @@
       <Edge From="76" To="77" Label="Source1" />
       <Edge From="78" To="79" Label="Source1" />
       <Edge From="79" To="80" Label="Source1" />
-      <Edge From="80" To="81" Label="Source1" />
-      <Edge From="81" To="86" Label="Source1" />
+      <Edge From="81" To="82" Label="Source1" />
       <Edge From="82" To="83" Label="Source1" />
-      <Edge From="83" To="84" Label="Source1" />
-      <Edge From="84" To="86" Label="Source2" />
-      <Edge From="85" To="86" Label="Source3" />
-      <Edge From="87" To="88" Label="Source1" />
+      <Edge From="83" To="91" Label="Source2" />
+      <Edge From="84" To="91" Label="Source3" />
+      <Edge From="85" To="86" Label="Source1" />
+      <Edge From="86" To="88" Label="Source1" />
+      <Edge From="87" To="88" Label="Source2" />
       <Edge From="88" To="89" Label="Source1" />
-      <Edge From="88" To="94" Label="Source1" />
       <Edge From="89" To="90" Label="Source1" />
       <Edge From="90" To="91" Label="Source1" />
-      <Edge From="91" To="92" Label="Source1" />
       <Edge From="92" To="93" Label="Source1" />
+      <Edge From="93" To="94" Label="Source1" />
+      <Edge From="93" To="99" Label="Source1" />
       <Edge From="94" To="95" Label="Source1" />
+      <Edge From="95" To="96" Label="Source1" />
+      <Edge From="96" To="97" Label="Source1" />
+      <Edge From="97" To="98" Label="Source1" />
+      <Edge From="99" To="100" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
