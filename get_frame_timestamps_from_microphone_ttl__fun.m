@@ -158,6 +158,17 @@ for f = 1 : n_files
         xlabel('Audio samples')
         % xlim([0 Fs*2]) % first 2 seconds
         % xlim([length(ttl)-[Fs*2, 0]]) % last 2 seconds
+
+%         k = Fs*5;
+%         indsToPlot = 1:k; % plot from start
+%         % indsToPlot = length(ttl)-k:length(ttl); % plot from end
+%         figure;
+%         hold on;
+%         plot(indsToPlot, ttl(indsToPlot))
+%         locsToPlot = locs( ismember(locs, indsToPlot) );
+%         pksToPlot  =  pks( ismember(locs, indsToPlot) );
+%         plot(locsToPlot,pksToPlot, 'v');
+%         xlabel('Audio samples')
         
         figure
         histogram(diff(locs)/Fs*1000)
@@ -175,22 +186,41 @@ for f = 1 : n_files
     v = VideoReader( fullpath_vid ); %#ok<TNMLP> 
     fprintf(' Video file loaded, nr. of video frames: %d \n', v.NumFrames);
     
+
+
+
+    nr_ttls_too_early = sum(locs < Fs);
+    if nr_ttls_too_early > 0
+        fprintf('\n ! ! ! ! ! \n');
+        fprintf(' There are %d frame TTLs right at the beginning of the audio trace where there should be none! \n', nr_ttls_too_early)
+        fprintf(' Something weird seems to have happened with the data acquisition.\n');
+        fprintf(' We will exclude these TTLs and proceed, but maybe you want to double-check what is going on. \n');
+        fprintf(' ! ! ! ! ! \n\n');
+
+        % Plot to check what is going on:
+        k = Fs*5;
+        indsToPlot = 1:k; % plot from start
+        % indsToPlot = length(ttl)-k:length(ttl); % plot from end
+        figure;
+        hold on;
+        plot(indsToPlot, ttl(indsToPlot))
+        locsToPlot = locs( ismember(locs, indsToPlot) );
+        pksToPlot  =  pks( ismember(locs, indsToPlot) );
+        plot(locsToPlot,pksToPlot, 'v');
+        xlabel('Audio samples')
+
+        locs(1:nr_ttls_too_early) = [];
+        pks(1:nr_ttls_too_early) = [];
+
+    end
+
     nr_dropped_frames = length(locs) - v.NumFrames;
 
     Files(f).vid_NumFrames        = v.NumFrames;
     Files(f).vid_NumDroppedFrames = nr_dropped_frames;
 
+
     if nr_dropped_frames ~= 0
-
-        Files(f).Problematic = true;
-
-        fprintf('\n ! ! ! ! ! \n');
-        fprintf(' There are %d dropped frames ! \n', nr_dropped_frames);
-        fprintf(' The number of video frames is %d, the number of TTL onsets extracted is %d \n', v.NumFrames, length(locs));
-        fprintf(' The TTL onset extraction could have missed some TTLs, or some frames could have been dropped.\n')
-        fprintf(' N.B. dropped frames do have a TTL (=camera sensor has been exposed) but they are not saved in the video file.\n')
-        fprintf(' ! ! ! ! ! \n');
-
         thr_dt = 0.003; % how many sec a frame has to be offset to detect a dropped frame
         d_locs_sec = diff(locs)/Fs;
         frametime_snd = mean(d_locs_sec);
@@ -200,8 +230,24 @@ for f = 1 : n_files
             fprintf('\n ! ! ! ! ! \n');
             fprintf(' Based on inter-TTL interval, %d TTLs were too close or too far apart compared to expected! \n', nr_problematic_ttls);
             fprintf(' There might be something wrong with the TTL onset extraction (but not necessarily). \n')
-            fprintf(' ! ! ! ! ! \n');
+            fprintf(' ! ! ! ! ! \n\n');
         end
+    end
+
+
+
+
+
+
+    if nr_dropped_frames > 0
+
+        Files(f).Problematic = true;
+
+        fprintf('\n ! ! ! ! ! \n');
+        fprintf(' There are %d dropped frames ! \n', nr_dropped_frames);
+        fprintf(' The number of video frames is %d, the number of TTL onsets extracted is %d \n', v.NumFrames, length(locs));
+        fprintf(' N.B. dropped frames do have a TTL (=camera sensor has been exposed) but they are not saved in the video file.\n')
+        fprintf(' ! ! ! ! ! \n\n');
 
     
     %     T = readmatrix( Files(f).fullpath_vid_csv, ...
@@ -229,18 +275,21 @@ for f = 1 : n_files
     
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    
-        inds_dropped_frames_id = find(diff(T(:,frameID_col)) > 1); %#ok<FNDSB> 
-        nr_dropped_frames_id = length( inds_dropped_frames_id );
+
+        inds_dropped_frames_id = find(diff(T(:,frameID_col)) > 1);
+        dt_dropped_frames_id   = (T(inds_dropped_frames_id+1,1)-T(inds_dropped_frames_id,1))/1e9;
+        nr_dropped_frames_id2   = arrayfun( @(x)(T(x+1,frameID_col)-T(x,frameID_col))-1, inds_dropped_frames_id ) ;
+        nr_dropped_frames_id    = sum(nr_dropped_frames_id2);
+        inds_dropped_frames_id2 = cell2mat( arrayfun( @(x,y)(x:x+y-1)', inds_dropped_frames_id, nr_dropped_frames_id2 , 'UniformOutput', false) );
         if nr_dropped_frames_id
             fprintf('\n ! ! ! ! ! \n');
             fprintf(' Based on the frame IDs, %d frames were dropped ! \n', nr_dropped_frames_id);
-            fprintf(' ! ! ! ! ! \n');
+            fprintf(' ! ! ! ! ! \n\n');
         end
-        dt_dropped_frames_id = (T(inds_dropped_frames_id+1,1)-T(inds_dropped_frames_id,1))/1e9;
         
         
-        thr_dt = 0.005; % how many sec a frame has to be offset to detect a dropped frame
+        
+        thr_dt = 0.002; % how many sec a frame has to be offset to detect a dropped frame
         dt_cam_sec = diff(T(:,1)/1e9);
         frametime_cam = mean(dt_cam_sec);
         inds_dropped_cam = find( (dt_cam_sec > (frametime_cam+thr_dt)) | (dt_cam_sec < (frametime_cam-thr_dt)));
@@ -275,15 +324,16 @@ for f = 1 : n_files
         end
     
     
-        if length(inds_dropped_frames_id) == nr_dropped_frames
-            inds_dropped_frames = inds_dropped_frames_id + 1;
-
+        if nr_dropped_frames_id == nr_dropped_frames
+            inds_dropped_frames = inds_dropped_frames_id2 + 1;
+            fprintf('All dropped frames were identified using frame IDs. Good, we proceed!\n\n')
             Files(f).Problematic = false;
     
         % If inds_dropped_frames_id has one frame less than the actual
         % nr_dropped_frames, take also the very last ttl as dropped frame:
-        elseif length(inds_dropped_frames_id) == nr_dropped_frames-1
-            inds_dropped_frames = [inds_dropped_frames_id + 1; length(locs)];
+        elseif nr_dropped_frames_id == nr_dropped_frames-1
+            inds_dropped_frames = [inds_dropped_frames_id2 + 1; length(locs)];
+            fprintf('All dropped frames minus 1 were identified using frame IDs. Ok, we proceed.\n\n')
             Files(f).Problematic = false;
         else
             fprintf('\n ! ! ! ! ! \n');
@@ -294,7 +344,26 @@ for f = 1 : n_files
 
             % inds_dropped_frames = inds_dropped_frames_bon;
         end
+
+        
     
+    elseif nr_dropped_frames < 0
+
+        Files(f).Problematic = true;
+
+        fprintf('\n ! ! ! ! ! \n');
+        fprintf(' There are %d dropped frames ! \n', nr_dropped_frames);
+        fprintf(' The number of video frames is %d, the number of TTL onsets extracted is %d \n', v.NumFrames, length(locs));
+        fprintf(' This happened because (1) (more likely) Bonsai acquisition was incorrectly ended by clicking on the red square, instead of pressing F8 or waiting the end of the trial.\n')
+        fprintf(' Or (2) the TTL onset extraction  missed some TTLs (check if nr_problematic_ttls > 0 --> nr_problematic_ttls = %d)\n', nr_problematic_ttls);
+        fprintf(' N.B. dropped frames do have a TTL (=camera sensor has been exposed) but they are not saved in the video file.\n')
+        fprintf(' ! ! ! ! ! \n');
+
+        % We can solve this problem later down, so we mark as 'false':
+        Files(f).Problematic = false;
+        Assume_Bonsai_was_badly_interrupted = true;
+        fprintf(' We will assume that (1) happened, fix accordingly, and proceed.\n\n')
+
     else
 
         Files(f).Problematic = false;
@@ -306,35 +375,68 @@ for f = 1 : n_files
 
 
     if Files(f).Problematic == false
-        locs_final = locs;
-        locs_final(inds_dropped_frames) = [];
 
-        if length(locs_final) ~= Files(f).vid_NumFrames
-            warning('The number of video frames is different from the number of TTL onsets extracted !!!')
-            fprintf(' Skipping exp because dropped frames problem could not be solved! \n\n');
-            Files(f).Problematic = true;
-            continue
-        else
-            if ~isempty(inds_dropped_frames)
-                Files(f).DroppedFramesCorrected = true;
+        if nr_dropped_frames >= 0
+
+
+            locs_final = locs;
+            locs_final(inds_dropped_frames) = [];
+    
+            if length(locs_final) ~= Files(f).vid_NumFrames
+                warning('The number of video frames is different from the number of TTL onsets extracted !!!')
+                fprintf(' Skipping exp because dropped frames problem could not be solved! \n\n');
+                Files(f).Problematic = true;
+                continue
+            else
+                if ~isempty(inds_dropped_frames)
+                    Files(f).DroppedFramesCorrected = true;
+                end
             end
+    
+            %%
+            
+            % Time vector of microphone audio data (in sec)
+            t_mic = [1 : length(y)]' / Fs;
+            
+            % Time vector of video frames (in sec, aligned to microphone audio data)
+            t_vid = t_mic(locs_final);
+            
+
+    
+        else % if nr_dropped_frames < 0
+
+            if Assume_Bonsai_was_badly_interrupted
+                locs_final = locs;
+    
+                % Time vector of microphone audio data (in sec)
+                t_mic = [1 : length(y)]' / Fs;
+                
+                % Time vector of video frames (in sec, aligned to microphone audio data)
+                t_vid = t_mic(locs_final);
+    
+                % Generate the missing frame timestamps at the end, using the
+                % average frame interval:
+                t_vid_missing = t_vid(end) + [1:abs(nr_dropped_frames)]'*frametime_snd;
+    
+                t_vid = [t_vid; t_vid_missing]; %#ok<AGROW> 
+            else
+                % !!! you are not supposed to end up here... Check the code
+                Files(f).Problematic = true;
+                fprintf(' Skipping exp because of some problem related to ''Assume_Bonsai_was_badly_interrupted'' \n\n');
+                continue
+            end
+
+
         end
 
-        %%
-        
-        % Time vector of microphone audio data (in sec)
-        t_mic = [1 : length(y)]' / Fs;
-        
-        % Time vector of video frames (in sec, aligned to microphone audio data)
-        t_vid = t_mic(locs_final);
-        
         % k = 1:1000000;
         % figure;
         % hold on;
         % plot(t_mic(k), y(k,1))
         % plot(t_vid, zeros(length(t_vid),1), 'v')
         % xlim([0 t_mic(k(end))])
-    
+
+
         %% Save timestamps in .mat file
         
         datamat_fullpath = fullfile(Files(f).folder, Files(f).datetime_tag);
@@ -367,5 +469,5 @@ if  nr_problematic_files > 0
 end
 
 if nargout < 1
-    assignin("caller","Files");
+    assignin("caller","Files",Files);
 end
