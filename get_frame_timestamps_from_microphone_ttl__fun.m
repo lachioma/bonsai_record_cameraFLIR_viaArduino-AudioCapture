@@ -12,7 +12,11 @@ if isempty(funstr)
     addpath(fileparts(p));
 end
 
-folder_dialogbox    = folder_root;
+if isfolder(folder_root)
+    folder_dialogbox  = folder_root;
+else
+    folder_dialogbox  = pwd;
+end
 
 FilesOrFolders = uipickfiles(...
     'FilterSpec',folder_dialogbox,... starting folder
@@ -124,7 +128,7 @@ for f = 1 : n_files
     % Take this piece from the end of the trace, because in the beginning the
     % ttl changes shape. Exclude the very last 1 second because there should be
     % no ttl at the very end:
-    final_samps_toExclude = Fs*10;
+    final_samps_toExclude = Fs*3;
     
     ttl_piece = ttl(end-final_samps_toExclude-nr_samps+1:end-final_samps_toExclude);
     
